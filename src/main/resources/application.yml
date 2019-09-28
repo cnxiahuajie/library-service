@@ -1,0 +1,47 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: library-service
+  redis:
+    host: 192.168.122.39
+    database: 12
+    password: 1234
+  datasource:
+    url: jdbc:mysql://192.168.122.39:3306/sme_cloud_library?useUnicode=true&useSSL=false&characterEncoding=utf8
+    username: root
+    password: 1234
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      connection-test-query: SELECT 1
+  data:
+    elasticsearch:
+      cluster-nodes: 192.168.122.39:9300
+      cluster-name: elasticsearch
+
+#mybatis
+mybatis-plus:
+  # 映射文件位置
+  mapperLocations: classpath:/mappers/*Mapper.xml
+  # 包别名
+  typeAliasesPackage: work.codehub.library.domain,work.codehub.library.pojo
+  global-config:
+    # 数据库相关配置
+    db-config:
+      # 驼峰下划线转换
+      column-underline: true
+      # 主键类型
+      id-type: input
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    jdbc-type-for-null: 'null'
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+work:
+  codehub:
+    library:
+      # 可匿名访问地址
+      anon-urls: /*/anon/**,/actuator,/actuator/**,/v1/article/**
