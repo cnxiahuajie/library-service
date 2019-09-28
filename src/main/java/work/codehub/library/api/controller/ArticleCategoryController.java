@@ -26,7 +26,7 @@ public class ArticleCategoryController {
     @Resource
     private IArticleCategoryService articleCategoryService;
 
-    @GetMapping("/article-categorys")
+    @GetMapping("/categories")
     public ResponseEntity list() {
         List<ArticleCategory> articleCategories = articleCategoryService.list();
         return ResponseEntity.build(HttpStatus.OK, articleCategories);

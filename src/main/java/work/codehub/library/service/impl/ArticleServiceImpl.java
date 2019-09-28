@@ -11,7 +11,7 @@ import work.codehub.library.service.IArticleService;
  *  服务实现类
  * </p>
  *
- * @author sme_cloud
+ * @author codehub
  * @since 2019-08-31
  */
 @Service

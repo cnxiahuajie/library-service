@@ -1,16 +1,16 @@
 package work.codehub.library.repository.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import work.codehub.library.domain.Article;
+import work.codehub.library.domain.Author;
 
 /**
  * <p>
- *  Mapper 接口
+ * Mapper 接口
  * </p>
  *
  * @author codehub
  * @since 2019-08-31
  */
-public interface ArticleMapper extends BaseMapper<Article> {
+public interface AuthorMapper extends BaseMapper<Author> {
 
 }

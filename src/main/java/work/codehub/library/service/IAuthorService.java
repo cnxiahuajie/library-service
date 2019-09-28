@@ -2,6 +2,7 @@ package work.codehub.library.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import work.codehub.library.domain.Article;
+import work.codehub.library.domain.Author;
 
 /**
  * <p>
@@ -11,6 +12,6 @@ import work.codehub.library.domain.Article;
  * @author codehub
  * @since 2019-08-31
  */
-public interface IArticleService extends IService<Article> {
+public interface IAuthorService extends IService<Author> {
 
 }

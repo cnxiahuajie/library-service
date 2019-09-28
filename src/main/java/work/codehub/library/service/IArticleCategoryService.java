@@ -11,7 +11,7 @@ import java.util.List;
  * 文章类别 服务类
  * </p>
  *
- * @author sme_cloud
+ * @author codehub
  * @since 2019-09-28
  */
 public interface IArticleCategoryService extends IService<ArticleCategory> {

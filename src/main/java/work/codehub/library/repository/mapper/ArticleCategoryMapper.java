@@ -12,7 +12,7 @@ import java.util.List;
  * 文章类别 Mapper 接口
  * </p>
  *
- * @author sme_cloud
+ * @author codehub
  * @since 2019-09-28
  */
 public interface ArticleCategoryMapper extends BaseMapper<ArticleCategory> {

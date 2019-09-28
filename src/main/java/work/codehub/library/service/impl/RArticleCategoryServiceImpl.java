@@ -11,7 +11,7 @@ import work.codehub.library.service.IRArticleCategoryService;
  * 文章与文章分类关联表 服务实现类
  * </p>
  *
- * @author sme_cloud
+ * @author codehub
  * @since 2019-09-28
  */
 @Service

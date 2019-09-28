@@ -8,7 +8,7 @@ import work.codehub.library.domain.RArticleCategory;
  * 文章与文章分类关联表 服务类
  * </p>
  *
- * @author sme_cloud
+ * @author codehub
  * @since 2019-09-28
  */
 public interface IRArticleCategoryService extends IService<RArticleCategory> {

@@ -6,48 +6,44 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import org.springframework.data.annotation.Id;
 
 import java.io.Serializable;
 
 /**
  * <p>
- * 文章与文章分类关联表
+ *
  * </p>
  *
  * @author codehub
- * @since 2019-09-28
+ * @since 2019-08-31
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("R_ARTICLE_CATEGORY")
-public class RArticleCategory implements Serializable {
+@TableName("AUTHOR")
+public class Author implements Serializable {
 
-    private static final long serialVersionUID=1L;
+    private static final long serialVersionUID = 1L;
 
     /**
-     * 主键
+     * 数据主键
      */
+    @Id
     @TableId("ID")
     private String id;
 
     /**
-     * 目标主键
+     * 昵称
      */
-    @TableField("TARGET_ID")
-    private String targetId;
+    @TableField("NAME")
+    private String name;
 
     /**
-     * 文章分类主键
+     * 邮箱
      */
-    @TableField("ARTICLE_CATEGORY_ID")
-    private String articleCategoryId;
-
-    /**
-     * 目标类型[1=文章/2=作者]
-     */
-    @TableField("TARGET_TYPE")
-    private String targetType;
+    @TableField("EMAIL")
+    private String email;
 
 
 }

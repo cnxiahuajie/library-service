@@ -14,7 +14,7 @@ import java.io.Serializable;
  * 文章类别
  * </p>
  *
- * @author sme_cloud
+ * @author codehub
  * @since 2019-09-28
  */
 @Data

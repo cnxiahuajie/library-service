@@ -18,7 +18,7 @@ import java.io.Serializable;
  *
  * </p>
  *
- * @author sme_cloud
+ * @author codehub
  * @since 2019-08-31
  */
 @Document(indexName = "library", type = "article", createIndex = true)

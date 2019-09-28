@@ -15,7 +15,7 @@ import java.util.List;
  * 文章类别 服务实现类
  * </p>
  *
- * @author sme_cloud
+ * @author codehub
  * @since 2019-09-28
  */
 @Service

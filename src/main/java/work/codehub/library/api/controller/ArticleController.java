@@ -48,7 +48,7 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequestMapping("/v1")
-public class ArticleApiController {
+public class ArticleController {
 
     @Resource
     private IArticleService articleService;
@@ -93,14 +93,16 @@ public class ArticleApiController {
         // 更新文章类别
         // 删除旧类别列表
         LambdaUpdateWrapper<RArticleCategory> wr = new UpdateWrapper<RArticleCategory>().lambda();
-        wr.eq(RArticleCategory::getArticleId, articleVO.getId());
+        wr.eq(RArticleCategory::getTargetId, articleVO.getId());
+        wr.eq(RArticleCategory::getTargetType, "1");
         irArticleCategoryService.remove(wr);
         // 添加新类别
         if (CollectionUtils.isNotEmpty(articleVO.getArticleCategories())) {
             articleVO.getArticleCategories().forEach(category -> {
                 RArticleCategory rArticleCategory = new RArticleCategory();
-                rArticleCategory.setArticleId(articleVO.getId());
+                rArticleCategory.setTargetId(articleVO.getId());
                 rArticleCategory.setArticleCategoryId(category.getId());
+                rArticleCategory.setTargetType("1");
                 irArticleCategoryService.save(rArticleCategory);
             });
         }
@@ -139,7 +141,7 @@ public class ArticleApiController {
             IOUtils.copy(is, os);
             lines = FileUtils.readLines(file, CommonConstants.Character.UTF_8);
         } catch (IOException e) {
-            log.error(ArticleApiController.class.getName(), e);
+            log.error(ArticleController.class.getName(), e);
         }
 
         StringBuffer stringBuffer = new StringBuffer();
