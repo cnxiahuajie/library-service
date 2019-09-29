@@ -8,7 +8,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
@@ -167,10 +166,8 @@ public class ArticleController {
         if (CommonConstants.Symbol.MINUS.equals(query.trim())) {
             query = StringUtils.EMPTY;
         }
-        HighlightBuilder.Field field = new HighlightBuilder.Field("content").preTags("<em>").postTags("</em>");
         SearchQuery searchQuery = new NativeSearchQueryBuilder().
                 withQuery(new MatchQueryBuilder("content", query))
-                .withHighlightFields(field)
                 .withPageable(PageRequest.of(page, 10)).build();
         Page<Article> articlePage = articleRepository.search(searchQuery);
         return ResponseEntity.build(HttpStatus.OK, articlePage);

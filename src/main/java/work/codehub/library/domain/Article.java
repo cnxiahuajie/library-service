@@ -21,7 +21,7 @@ import java.io.Serializable;
  * @author codehub
  * @since 2019-08-31
  */
-@Document(indexName = "library", type = "article", createIndex = true)
+@Document(indexName = "library", type = "article")
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
