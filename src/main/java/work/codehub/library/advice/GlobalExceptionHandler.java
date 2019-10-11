@@ -1,9 +1,12 @@
 package work.codehub.library.advice;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import work.codehub.library.api.model.ResponseEntity;
+import work.codehub.library.exception.UnauthenticationException;
 import work.codehub.library.util.StringUtils;
 
 import java.io.IOException;
@@ -72,6 +75,21 @@ public class GlobalExceptionHandler {
     public ResponseEntity illegalArgumentException(Exception e) {
         log.error(getStackTrace(e));
         return ResponseEntity.error(e.getMessage());
+    }
+
+    /**
+     * 认证失败处理器 .<br>
+     *
+     * @param e 异常对象
+     * @return ResponseEntity 响应对象
+     * @author andy.sher
+     * @date 2018/7/11 14:38
+     */
+    @ExceptionHandler(value = UnauthenticationException.class)
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED, reason = "认证失败。")
+    public ResponseEntity unauthenticationException(Exception e) {
+        log.error(getStackTrace(e));
+        return ResponseEntity.unauthorized(e.getMessage());
     }
 
 }

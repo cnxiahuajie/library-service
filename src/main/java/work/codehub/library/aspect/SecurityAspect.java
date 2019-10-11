@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import work.codehub.library.api.model.ResponseEntity;
@@ -31,16 +32,18 @@ public class SecurityAspect {
         Object responseData = joinPoint.proceed();
         if (responseData instanceof ResponseEntity) {
             ResponseEntity responseEntity = (ResponseEntity) responseData;
-            Object data = responseEntity.getData();
-            JSONObject jsonData;
-            if (null == data) {
-                jsonData = new JSONObject();
-            } else {
-                jsonData = JSONObject.parseObject(JSONObject.toJSONString(responseEntity.getData()));
+            if (HttpStatus.OK.value() == responseEntity.getCode()) {
+                Object data = responseEntity.getData();
+                JSONObject jsonData;
+                if (null == data) {
+                    jsonData = new JSONObject();
+                } else {
+                    jsonData = JSONObject.parseObject(JSONObject.toJSONString(responseEntity.getData()));
+                }
+                jsonData.put("token", UUID.randomUUID().toString());
+                tokenRedisTemplate.add(jsonData.getString("token"));
+                responseEntity.setData(jsonData);
             }
-            jsonData.put("token", UUID.randomUUID().toString());
-            tokenRedisTemplate.add(jsonData.getString("token"));
-            responseEntity.setData(jsonData.toJSONString());
         }
 
         return responseData;

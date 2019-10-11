@@ -3,6 +3,7 @@ package work.codehub.library.util;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 /**
@@ -21,6 +22,9 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
     private static Pattern PATTERN_JAVASCRIPT = Pattern.compile("javascript:", Pattern.CASE_INSENSITIVE);
     private static Pattern PATTERN_VBSCRIPT = Pattern.compile("vbscript:", Pattern.CASE_INSENSITIVE);
     private static Pattern PATTERN_ONLOAD = Pattern.compile("onload(.*?)=", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
+
+    private static char[] CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
+            'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
 
     /**
      * 驼峰转烤串
@@ -157,6 +161,21 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
             tmpPath += File.separator;
         }
         return tmpPath;
+    }
+
+    /**
+     * 获取随机字符串
+     *
+     * @return
+     */
+    public static String getRandomString(int length) {
+        Random random = new Random();
+        StringBuilder str = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            char num = CHARS[random.nextInt(CHARS.length)];
+            str.append(num);
+        }
+        return str.toString();
     }
 
 }
