@@ -38,6 +38,12 @@ public class ArticleCategory implements Serializable {
     private String name;
 
     /**
+     * 颜色代码
+     */
+    @TableField("COLOR_CODE")
+    private String colorCode;
+
+    /**
      * 状态
      */
     @TableField("STATUS")

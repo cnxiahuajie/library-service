@@ -2,7 +2,7 @@ package work.codehub.library.repository.elasticsearch;
 
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 import org.springframework.stereotype.Repository;
-import work.codehub.library.domain.Article;
+import work.codehub.library.pojo.ArticleVO;
 
 /**
  * 文章ES仓库 .<br>
@@ -11,7 +11,7 @@ import work.codehub.library.domain.Article;
  * @date 2019/9/17 13:10
  */
 @Repository
-public interface ArticleRepository extends ElasticsearchRepository<Article, String> {
+public interface ArticleRepository extends ElasticsearchRepository<ArticleVO, String> {
 
     /**
      * 按文章ID查询文章 .
@@ -21,6 +21,6 @@ public interface ArticleRepository extends ElasticsearchRepository<Article, Stri
      * @author andy.sher
      * @date 2019/9/17 13:11
      */
-    Article queryById(String id);
+    ArticleVO queryById(String id);
 
 }

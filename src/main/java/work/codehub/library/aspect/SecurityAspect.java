@@ -8,7 +8,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import work.codehub.library.api.model.ResponseEntity;
+import work.codehub.library.domain.Author;
+import work.codehub.library.model.TokenInfo;
+import work.codehub.library.pojo.AuthorVO;
 import work.codehub.library.repository.redis.TokenRedisTemplate;
+import work.codehub.library.util.BeanUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -41,7 +45,11 @@ public class SecurityAspect {
                     jsonData = JSONObject.parseObject(JSONObject.toJSONString(responseEntity.getData()));
                 }
                 jsonData.put("token", UUID.randomUUID().toString());
-                tokenRedisTemplate.add(jsonData.getString("token"));
+                Author author = jsonData.getObject("authorDetails", Author.class);
+                TokenInfo tokenInfo = new TokenInfo();
+                tokenInfo.setAuthorVO(BeanUtils.copy(author, AuthorVO.class));
+                tokenInfo.setToken(jsonData.getString("token"));
+                tokenRedisTemplate.add(jsonData.getString("token"), tokenInfo);
                 responseEntity.setData(jsonData);
             }
         }

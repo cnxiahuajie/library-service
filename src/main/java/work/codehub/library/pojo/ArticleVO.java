@@ -17,6 +17,11 @@ public class ArticleVO extends Article {
     private static final long serialVersionUID = 1966076015135655347L;
 
     /**
+     * 作者信息
+     */
+    private AuthorVO authorVO;
+
+    /**
      * 文章类别列表
      */
     private List<ArticleCategoryVO> articleCategories;

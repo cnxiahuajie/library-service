@@ -1,6 +1,8 @@
 package work.codehub.library.api.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,8 +13,10 @@ import work.codehub.library.annotation.Login;
 import work.codehub.library.annotation.Logout;
 import work.codehub.library.api.model.RequestEntity;
 import work.codehub.library.api.model.ResponseEntity;
+import work.codehub.library.domain.Author;
 import work.codehub.library.exception.UnauthenticationException;
 import work.codehub.library.repository.redis.VerificationCodeRedisTemplate;
+import work.codehub.library.service.IAuthorService;
 import work.codehub.library.util.StringUtils;
 
 import javax.annotation.Resource;
@@ -30,6 +34,9 @@ public class SecurityController {
     @Resource
     private VerificationCodeRedisTemplate verificationCodeRedisTemplate;
 
+    @Resource
+    private IAuthorService authorService;
+
     @Login
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody RequestEntity requestEntity) {
@@ -43,7 +50,11 @@ public class SecurityController {
         String realPassword = verificationCodeRedisTemplate.get(username);
 
         if (StringUtils.isNotBlank(realPassword) && password.equals(realPassword)) {
-            return ResponseEntity.build(HttpStatus.OK);
+            LambdaQueryWrapper<Author> wr = new QueryWrapper<Author>().lambda();
+            Author author = authorService.getOne(wr);
+            JSONObject data = new JSONObject();
+            data.put("authorDetails", author);
+            return ResponseEntity.build(HttpStatus.OK, data);
         } else {
             throw new UnauthenticationException("认证失败。");
         }

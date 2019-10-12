@@ -51,6 +51,12 @@ public class Article implements Serializable {
     private String content;
 
     /**
+     * 作者主键
+     */
+    @TableField("AUTHOR_ID")
+    private String authorId;
+
+    /**
      * 状态[1=草稿/2=待发布/3=已发布]
      */
     @TableField("STATUS")

@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,26 +15,28 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 import work.codehub.library.api.model.RequestEntity;
 import work.codehub.library.api.model.ResponseEntity;
 import work.codehub.library.constants.CommonConstants;
 import work.codehub.library.domain.Article;
+import work.codehub.library.domain.ArticleCategory;
+import work.codehub.library.domain.Author;
 import work.codehub.library.domain.RArticleCategory;
+import work.codehub.library.helper.LocalStore;
 import work.codehub.library.pojo.ArticleCategoryVO;
 import work.codehub.library.pojo.ArticleVO;
+import work.codehub.library.pojo.AuthorVO;
 import work.codehub.library.repository.elasticsearch.ArticleRepository;
 import work.codehub.library.service.IArticleCategoryService;
 import work.codehub.library.service.IArticleService;
+import work.codehub.library.service.IAuthorService;
 import work.codehub.library.service.IRArticleCategoryService;
 import work.codehub.library.util.BeanUtils;
 import work.codehub.library.util.StringUtils;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.util.List;
 import java.util.UUID;
@@ -61,9 +64,13 @@ public class ArticleController {
     @Resource
     private IRArticleCategoryService irArticleCategoryService;
 
+    @Resource
+    private IAuthorService authorService;
+
     @PostMapping(value = "/article")
     public ResponseEntity add(@RequestBody RequestEntity requestEntity) {
         ArticleVO articleVO = JSONObject.parseObject(requestEntity.getData(), ArticleVO.class);
+        articleVO.setAuthorId(LocalStore.getAuthor().getId());
         // 保存文章信息
         articleService.save(articleVO);
         // 保存文章索引
@@ -76,7 +83,7 @@ public class ArticleController {
         Assert.notNull(id, "请选择文章。");
         Article article = articleService.getById(id);
         // 删除索引
-        articleRepository.delete(article);
+        articleRepository.delete(BeanUtils.copy(article, ArticleVO.class));
         // 删除文章
         articleService.removeById(id);
         return ResponseEntity.build(HttpStatus.OK);
@@ -128,12 +135,11 @@ public class ArticleController {
     }
 
     @PostMapping("/article/upload")
-    public ResponseEntity upload(HttpServletRequest request) {
-        MultiValueMap<String, MultipartFile> multipartFileMultiValueMap = ((MultipartHttpServletRequest) request)
-                .getMultiFileMap();
-        MultipartFile multipartFile = multipartFileMultiValueMap.getFirst("file");
+    public ResponseEntity upload(@RequestParam("file") MultipartFile multipartFile, @RequestParam("categories") String[] categories) {
+        // 获取文件名
         String title = multipartFile.getOriginalFilename();
         String tmpFilePath = StringUtils.getTmpPath() + UUID.randomUUID().toString();
+
         File file = new File(tmpFilePath);
         List<String> lines = null;
         try (InputStream is = multipartFile.getInputStream(); OutputStream os = new FileOutputStream(file)) {
@@ -153,10 +159,27 @@ public class ArticleController {
         ArticleVO articleVO = new ArticleVO();
         articleVO.setTitle(title.substring(0, title.lastIndexOf(CommonConstants.Symbol.DOT)));
         articleVO.setContent(StringUtils.stripXSS(stringBuffer.toString()));
+        articleVO.setAuthorId(LocalStore.getAuthor().getId());
         articleService.save(articleVO);
         // 保存索引
         articleVO.setContent(StringUtils.stripHtml(articleVO.getContent()));
         articleRepository.save(articleVO);
+
+        // 获取文章分类
+        if (ArrayUtils.isNotEmpty(categories)) {
+            ArticleCategory articleCategory;
+            RArticleCategory rArticleCategory = null;
+            for (String category : categories) {
+                articleCategory = articleCategoryService.getById(category);
+                if (null != articleCategory) {
+                    rArticleCategory = new RArticleCategory();
+                    rArticleCategory.setTargetId(articleVO.getId());
+                    rArticleCategory.setTargetType("1");
+                    rArticleCategory.setArticleCategoryId(category);
+                    irArticleCategoryService.save(rArticleCategory);
+                }
+            }
+        }
 
         return ResponseEntity.build(HttpStatus.CREATED);
     }
@@ -169,7 +192,20 @@ public class ArticleController {
         SearchQuery searchQuery = new NativeSearchQueryBuilder().
                 withQuery(new MatchQueryBuilder("content", query))
                 .withPageable(PageRequest.of(page, 10)).build();
-        Page<Article> articlePage = articleRepository.search(searchQuery);
+        Page<ArticleVO> articlePage = articleRepository.search(searchQuery);
+
+        List<ArticleVO> articles = articlePage.getContent();
+        if (CollectionUtils.isNotEmpty(articles)) {
+            articles.forEach(article -> {
+                // 组装文章分类
+                List<ArticleCategoryVO> categories = articleCategoryService.listByArticleId(article.getId());
+                article.setArticleCategories(categories);
+                // 组装作者信息
+                Author author = authorService.getById(article.getAuthorId());
+                article.setAuthorVO(BeanUtils.copy(author, AuthorVO.class));
+            });
+        }
+
         return ResponseEntity.build(HttpStatus.OK, articlePage);
     }
 
