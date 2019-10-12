@@ -1,5 +1,6 @@
 package work.codehub.library.api.model;
 
+import com.alibaba.fastjson.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,9 +35,14 @@ public class ResponseEntity implements Serializable {
     }
 
     public static ResponseEntity ok() {
+        return ok(null);
+    }
+
+    public static ResponseEntity ok(JSONObject data) {
         ResponseEntity responseEntity = new ResponseEntity();
         responseEntity.setCode(HttpStatus.OK.value());
         responseEntity.setMsg(HttpStatus.OK.getReasonPhrase());
+        responseEntity.setData(data);
         return responseEntity;
     }
 
