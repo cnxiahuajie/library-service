@@ -15,8 +15,10 @@ import work.codehub.library.api.model.RequestEntity;
 import work.codehub.library.api.model.ResponseEntity;
 import work.codehub.library.domain.Author;
 import work.codehub.library.exception.UnauthenticationException;
+import work.codehub.library.pojo.AuthorVO;
 import work.codehub.library.repository.redis.VerificationCodeRedisTemplate;
 import work.codehub.library.service.IAuthorService;
+import work.codehub.library.util.BeanUtils;
 import work.codehub.library.util.StringUtils;
 
 import javax.annotation.Resource;
@@ -51,9 +53,22 @@ public class SecurityController {
 
         if (StringUtils.isNotBlank(realPassword) && password.equals(realPassword)) {
             LambdaQueryWrapper<Author> wr = new QueryWrapper<Author>().lambda();
+            wr.eq(Author::getEmail, username);
             Author author = authorService.getOne(wr);
+            AuthorVO authorVO = null;
+
+            // 如果没有找到用户就新增一个新用户
+            if (null == author) {
+                authorVO = new AuthorVO();
+                authorVO.setEmail(username);
+                authorVO.setName("路人" + StringUtils.getRandomString(6));
+                authorService.save(authorVO);
+            } else {
+                authorVO = BeanUtils.copy(author, AuthorVO.class);
+            }
+
             JSONObject data = new JSONObject();
-            data.put("authorDetails", author);
+            data.put("authorDetails", authorVO);
             return ResponseEntity.build(HttpStatus.OK, data);
         } else {
             throw new UnauthenticationException("认证失败。");

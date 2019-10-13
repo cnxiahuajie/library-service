@@ -7,20 +7,23 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import work.codehub.library.api.model.RequestEntity;
 import work.codehub.library.api.model.ResponseEntity;
 import work.codehub.library.domain.Author;
 import work.codehub.library.domain.RArticleCategory;
+import work.codehub.library.helper.LocalStore;
+import work.codehub.library.model.TokenInfo;
+import work.codehub.library.pojo.ArticleCategoryVO;
 import work.codehub.library.pojo.AuthorVO;
+import work.codehub.library.repository.redis.TokenRedisTemplate;
 import work.codehub.library.service.IAuthorService;
 import work.codehub.library.service.IRArticleCategoryService;
 import work.codehub.library.util.BeanUtils;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/v1")
@@ -31,6 +34,48 @@ public class AuthorController {
 
     @Resource
     private IRArticleCategoryService irArticleCategoryService;
+
+    @Resource
+    private TokenRedisTemplate tokenRedisTemplate;
+
+    @GetMapping("/author/me")
+    public ResponseEntity me() {
+        Author author = authorService.getById(LocalStore.getAuthor().getId());
+        AuthorVO authorVO = null;
+        if (null != author) {
+            authorVO = BeanUtils.copy(author, AuthorVO.class);
+            LambdaQueryWrapper<RArticleCategory> wr = new QueryWrapper<RArticleCategory>().lambda();
+            wr.eq(RArticleCategory::getTargetId, authorVO.getId());
+            wr.eq(RArticleCategory::getTargetType, "2");
+            List<RArticleCategory> rArticleCategories = irArticleCategoryService.list(wr);
+            if (CollectionUtils.isNotEmpty(rArticleCategories)) {
+                List<ArticleCategoryVO> articleCategoryVOS = new ArrayList<>();
+                rArticleCategories.forEach(rArticleCategory -> {
+                    ArticleCategoryVO articleCategoryVO = new ArticleCategoryVO();
+                    articleCategoryVO.setId(rArticleCategory.getArticleCategoryId());
+                    articleCategoryVOS.add(articleCategoryVO);
+                });
+                authorVO.setInterests(articleCategoryVOS);
+            }
+            // 更新用户认证信息
+            TokenInfo tokenInfo = tokenRedisTemplate.get(LocalStore.getToken());
+            tokenRedisTemplate.add(LocalStore.getToken(), tokenInfo);
+        }
+        JSONObject data = new JSONObject();
+        data.put("author", authorVO);
+        return ResponseEntity.build(HttpStatus.OK, data);
+    }
+
+    @PostMapping("/author/checkEmailExist")
+    public ResponseEntity checkEmailExist(@RequestBody RequestEntity requestEntity) {
+        AuthorVO authorVO = JSONObject.parseObject(requestEntity.getData(), AuthorVO.class);
+        LambdaQueryWrapper<Author> wr = new QueryWrapper<Author>().lambda();
+        wr.eq(Author::getEmail, authorVO.getEmail());
+        int count = authorService.count(wr);
+        JSONObject data = new JSONObject();
+        data.put("result", count);
+        return ResponseEntity.ok(data);
+    }
 
     @PostMapping("/author/synchronization")
     public ResponseEntity synchronization(@RequestBody RequestEntity requestEntity) {

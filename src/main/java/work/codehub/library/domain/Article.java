@@ -57,6 +57,12 @@ public class Article implements Serializable {
     private String authorId;
 
     /**
+     * 阅读数量
+     */
+    @TableField("VIEW_COUNT")
+    private Integer viewCount;
+
+    /**
      * 状态[1=草稿/2=待发布/3=已发布]
      */
     @TableField("STATUS")

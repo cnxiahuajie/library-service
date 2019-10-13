@@ -1,23 +1,26 @@
-create table ARTICLE
+create table LIBRARY.ARTICLE
 (
-  ID      char(64)         not null comment '主键'
+  ID         char(64)         not null comment '主键'
     primary key,
-  TITLE   varchar(50)      not null comment '文章标题',
-  CONTENT longtext         not null comment '文章内容',
-  STATUS  char default 'E' not null comment '文章状态'
+  TITLE      varchar(50)      not null comment '文章标题',
+  CONTENT    longtext         not null comment '文章内容',
+  AUTHOR_ID  char(64)         not null comment '作者主键',
+  VIEW_COUNT int  default 0   not null comment '阅读数量',
+  STATUS     char default 'E' not null comment '文章状态'
 )
   comment '文章信息表';
 
-create table ARTICLE_CATEGORY
+create table LIBRARY.ARTICLE_CATEGORY
 (
-  ID     char(64)         not null comment '主键'
+  ID         char(64)         not null comment '主键'
     primary key,
-  NAME   varchar(10)      not null comment '类别名称',
-  STATUS char default 'E' not null comment '状态'
+  NAME       varchar(10)      not null comment '类别名称',
+  COLOR_CODE char(7)          not null comment '颜色代码',
+  STATUS     char default 'E' not null comment '状态'
 )
   comment '文章类别';
 
-create table AUTHOR
+create table LIBRARY.AUTHOR
 (
   ID    char(64)     not null comment '主键'
     primary key,
@@ -26,7 +29,7 @@ create table AUTHOR
 )
   comment '作者信息表';
 
-create table R_ARTICLE_CATEGORY
+create table LIBRARY.R_ARTICLE_CATEGORY
 (
   ID                  char(64) not null comment '主键'
     primary key,
