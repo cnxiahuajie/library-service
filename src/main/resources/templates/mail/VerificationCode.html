@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>邮件验证码</title>
+
+    <style type="text/css">
+        .code {
+            font-size: 18px;
+            font-weight: bold;
+            color: #409EFF;
+        }
+    </style>
+</head>
+<body>
+<div class="box">
+    <p>
+        请妥善保存您的口令！
+    </p>
+    <p class="code" th:text="${code}"></p>
+</div>
+</body>
+</html>

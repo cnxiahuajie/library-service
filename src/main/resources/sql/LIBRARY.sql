@@ -29,6 +29,18 @@ create table LIBRARY.AUTHOR
 )
   comment '作者信息表';
 
+create table FEEDBACK
+(
+  ID          char(64)         not null
+  comment '数据主键'
+    primary key,
+  DESCRIPTION varchar(100)     not null
+  comment '反馈问题内容',
+  STATUS      char default '0' null
+  comment '是否解决[1=已解决/0=未解决]'
+)
+  comment '问题反馈信息表';
+
 create table LIBRARY.R_ARTICLE_CATEGORY
 (
   ID                  char(64) not null comment '主键'

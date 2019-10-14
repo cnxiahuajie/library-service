@@ -26,7 +26,7 @@ public class VerificationCodeRedisTemplate {
      * @date 2019/10/11 16:01
      */
     public void add(String key, String value) {
-        stringRedisTemplate.opsForValue().set(key, value, EXPIRE, TimeUnit.SECONDS);
+        stringRedisTemplate.opsForValue().set(getKey(key), value, EXPIRE, TimeUnit.SECONDS);
     }
 
     /**
@@ -38,7 +38,7 @@ public class VerificationCodeRedisTemplate {
      * @date 2019/10/11 16:01
      */
     public void delete(String key) {
-        stringRedisTemplate.delete(key);
+        stringRedisTemplate.delete(getKey(key));
     }
 
     /**
@@ -50,7 +50,11 @@ public class VerificationCodeRedisTemplate {
      * @date 2019/10/11 16:01
      */
     public String get(String key) {
-        return stringRedisTemplate.opsForValue().get(key);
+        return stringRedisTemplate.opsForValue().get(getKey(key));
+    }
+
+    private String getKey(String key) {
+        return "verification-code:" + key;
     }
 
 }

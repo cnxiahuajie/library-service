@@ -47,7 +47,7 @@ public class SecurityController {
         String password = requestData.getString("password");
 
         Assert.hasLength(username, "邮箱不能为空。");
-        Assert.hasLength(password, "验证码不能为空。");
+        Assert.hasLength(password, "口令不能为空。");
 
         String realPassword = verificationCodeRedisTemplate.get(username);
 

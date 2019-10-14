@@ -20,4 +20,7 @@ public class LibraryProperties {
     @Value("${work.codehub.library.anon-urls}")
     private String anonUrls;
 
+    @Value("${spring.mail.username}")
+    private String mailUsername;
+
 }

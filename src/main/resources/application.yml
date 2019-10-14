@@ -5,10 +5,11 @@ spring:
   application:
     name: library-service
   redis:
-    host: 192.168.0.111
+    host: 192.168.122.39
     database: 12
+    password: 1234
   datasource:
-    url: jdbc:mysql://192.168.0.111:3306/LIBRARY?useUnicode=true&useSSL=false&characterEncoding=utf8
+    url: jdbc:mysql://192.168.122.39:3306/LIBRARY?useUnicode=true&useSSL=false&characterEncoding=utf8
     username: root
     password: 1234
     hikari:
@@ -17,8 +18,21 @@ spring:
       connection-test-query: SELECT 1
   data:
     elasticsearch:
-      cluster-nodes: 192.168.0.111:9300
+      cluster-nodes: 192.168.122.39:9300
       cluster-name: elasticsearch
+  # 邮箱配置
+  mail:
+    default-encoding: UTF-8
+    port: 465
+    protocol: smtp
+    host: smtp.163.com
+    username: vteamsystem@163.com
+    password: 123456a
+    sendmail: vteamsystem@163.com
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.ssl.enable: true
+      mail.smtp.socketFactory.class: javax.net.ssl.SSLSocketFactory
 
 #mybatis
 mybatis-plus:

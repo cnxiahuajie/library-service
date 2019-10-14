@@ -7,10 +7,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import work.codehub.library.api.model.RequestEntity;
 import work.codehub.library.api.model.ResponseEntity;
+import work.codehub.library.model.MailTemplate;
 import work.codehub.library.repository.redis.VerificationCodeRedisTemplate;
+import work.codehub.library.util.MailUtils;
 import work.codehub.library.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/v1")
@@ -27,7 +31,19 @@ public class CommonController {
     @PostMapping("/common/send-email-verification-code")
     public ResponseEntity sendEmailVerificationCode(@RequestBody RequestEntity requestEntity) {
         JSONObject data = JSONObject.parseObject(requestEntity.getData());
-        verificationCodeRedisTemplate.add(data.getString("username"), StringUtils.getRandomString(CODE_LENGTH));
+        String email = data.getString("username");
+        String code = StringUtils.getRandomString(CODE_LENGTH);
+        verificationCodeRedisTemplate.add(email, code);
+
+        MailTemplate mailTemplate = new MailTemplate();
+        mailTemplate.setTo(email);
+        mailTemplate.setSubject("图书馆的认证口令");
+        mailTemplate.setTemplate("mail/VerificationCode");
+        Map<String, String> params = new HashMap<>();
+        params.put("code", code);
+        mailTemplate.setParams(params);
+        MailUtils.send(mailTemplate);
+
         return ResponseEntity.ok();
     }
 

@@ -20,6 +20,19 @@ spring:
     elasticsearch:
       cluster-nodes: 192.168.122.128:9300
       cluster-name: elasticsearch
+  # 邮箱配置
+  mail:
+    default-encoding: UTF-8
+    port: 465
+    protocol: smtp
+    host: smtp.163.com
+    username: vteamsystem@163.com
+    password: 123456a
+    sendmail: vteamsystem@163.com
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.ssl.enable: true
+      mail.smtp.socketFactory.class: javax.net.ssl.SSLSocketFactory
 
 #mybatis
 mybatis-plus:
