@@ -82,11 +82,19 @@ public class ArticleController {
     public ResponseEntity delete(@PathVariable("id") String id) {
         Assert.notNull(id, "请选择文章。");
         Article article = articleService.getById(id);
-        // 删除索引
-        articleRepository.delete(BeanUtils.copy(article, ArticleVO.class));
-        // 删除文章
-        articleService.removeById(id);
-        return ResponseEntity.build(HttpStatus.OK);
+
+        String cuurentAuthorId = LocalStore.getAuthor().getId();
+        String articleAuthorId = article.getAuthorId();
+        // 如果当前认证用户和文章作者相同，则允许操作，否则401
+        if (cuurentAuthorId.equals(articleAuthorId)) {
+            // 删除索引
+            articleRepository.delete(BeanUtils.copy(article, ArticleVO.class));
+            // 删除文章
+            articleService.removeById(id);
+            return ResponseEntity.build(HttpStatus.OK);
+        } else {
+            return ResponseEntity.unauthorized("没有权限。");
+        }
     }
 
     @PatchMapping(value = "/article")
@@ -120,7 +128,7 @@ public class ArticleController {
         return ResponseEntity.build(HttpStatus.OK, articleVO);
     }
 
-    @GetMapping(value = "/article/{id}")
+    @GetMapping(value = "/anon/article/{id}")
     public ResponseEntity get(@PathVariable("id") String id) {
         Assert.notNull(id, "数据主键不存在。");
         Article article = articleService.getById(id);
@@ -184,7 +192,7 @@ public class ArticleController {
         return ResponseEntity.build(HttpStatus.CREATED);
     }
 
-    @GetMapping("/article/search/{q}/{p}")
+    @GetMapping("/anon/article/search/{q}/{p}")
     public ResponseEntity search(@PathVariable("q") String query, @PathVariable("p") Integer page) {
         if (CommonConstants.Symbol.MINUS.equals(query.trim())) {
             query = StringUtils.EMPTY;

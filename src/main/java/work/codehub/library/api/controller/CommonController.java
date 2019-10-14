@@ -28,7 +28,7 @@ public class CommonController {
     @Resource
     private VerificationCodeRedisTemplate verificationCodeRedisTemplate;
 
-    @PostMapping("/common/send-email-verification-code")
+    @PostMapping("/anon/common/send-email-verification-code")
     public ResponseEntity sendEmailVerificationCode(@RequestBody RequestEntity requestEntity) {
         JSONObject data = JSONObject.parseObject(requestEntity.getData());
         String email = data.getString("username");

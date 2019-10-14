@@ -25,7 +25,7 @@ public class FeedbackController {
     @Resource
     private IFeedbackService feedbackService;
 
-    @PostMapping("/feedback")
+    @PostMapping("/anon/feedback")
     public ResponseEntity add(@RequestBody RequestEntity requestEntity) {
         Feedback feedback = JSONObject.parseObject(requestEntity.getData(), Feedback.class);
         feedbackService.save(feedback);

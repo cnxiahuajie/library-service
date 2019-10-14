@@ -57,4 +57,4 @@ work:
   codehub:
     library:
       # 可匿名访问地址
-      anon-urls: /*/anon/**,/actuator,/actuator/**,/v1/article/**
+      anon-urls: /*/anon/**,/actuator,/actuator/**,/v1/login,/v1/logout
