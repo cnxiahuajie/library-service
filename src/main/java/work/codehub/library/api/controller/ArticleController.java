@@ -133,6 +133,8 @@ public class ArticleController {
         Assert.notNull(id, "数据主键不存在。");
         Article article = articleService.getById(id);
         ArticleVO articleVO = BeanUtils.copy(article, ArticleVO.class);
+        article.setViewCount(article.getViewCount() + 1);
+        articleService.updateById(article);
         // 组装文章类别
         List<ArticleCategoryVO> articleCategories = articleCategoryService.listByArticleId(articleVO.getId());
         if (CollectionUtils.isNotEmpty(articleCategories)) {
