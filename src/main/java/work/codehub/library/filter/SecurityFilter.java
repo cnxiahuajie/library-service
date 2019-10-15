@@ -10,9 +10,11 @@ import work.codehub.library.util.StringUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.*;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.UUID;
 
 /**
  * 安全过滤器 .<br>
@@ -25,6 +27,8 @@ import java.io.IOException;
 public class SecurityFilter implements Filter {
 
     private String TOKEN = "access_token";
+
+    private String SESSION_ID = "_session_id";
 
     @Resource
     private TokenRedisTemplate tokenRedisTemplate;
@@ -40,12 +44,26 @@ public class SecurityFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest servletRequest = (HttpServletRequest) request;
+        HttpServletResponse servletResponse = (HttpServletResponse) response;
+        // 判断是否初次访问
+        boolean first = true;
+        for (Cookie cookie : servletRequest.getCookies()) {
+            if ((libraryProperties.getApplicationName() + SESSION_ID).equals(cookie.getName())) {
+                first = false;
+            }
+        }
+        // 初次访问则放入sessionid
+        if (!first) {
+            Cookie cookie = new Cookie((libraryProperties.getApplicationName() + SESSION_ID), UUID.randomUUID().toString());
+            cookie.setMaxAge(86000);
+            cookie.setPath("/");
+            servletResponse.addCookie(cookie);
+        }
         String contextPath = servletRequest.getRequestURI();
         // 匿名访问资源或（已登录并且有权）的情况下直接放行
         if (isAnonResource(contextPath) || (authenticated(request.getParameter(TOKEN)) && checkAuthorization(contextPath))) {
             filterChain.doFilter(request, response);
         } else {
-            HttpServletResponse servletResponse = (HttpServletResponse) response;
             servletResponse.sendError(HttpStatus.UNAUTHORIZED.value(), "没有权限。");
             return;
         }
@@ -85,5 +103,6 @@ public class SecurityFilter implements Filter {
         // TODO 暂不实现，待后期有需求再实现
         return true;
     }
+
 
 }

@@ -25,6 +25,8 @@ import work.codehub.library.domain.ArticleCategory;
 import work.codehub.library.domain.Author;
 import work.codehub.library.domain.RArticleCategory;
 import work.codehub.library.helper.LocalStore;
+import work.codehub.library.plugins.websocket.endpoint.NotificationEndpoint;
+import work.codehub.library.plugins.websocket.model.Barrage;
 import work.codehub.library.pojo.ArticleCategoryVO;
 import work.codehub.library.pojo.ArticleVO;
 import work.codehub.library.pojo.AuthorVO;
@@ -190,6 +192,9 @@ public class ArticleController {
                 }
             }
         }
+
+        // 弹幕通知所有人
+        NotificationEndpoint.sendInfo(null, Barrage.build(String.format("%s 发布了 %s", LocalStore.getAuthor().getName(), articleVO.getTitle())));
 
         return ResponseEntity.build(HttpStatus.CREATED);
     }
