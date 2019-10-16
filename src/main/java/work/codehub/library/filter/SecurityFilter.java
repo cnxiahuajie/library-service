@@ -10,11 +10,9 @@ import work.codehub.library.util.StringUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.*;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.UUID;
 
 /**
  * 安全过滤器 .<br>
@@ -45,23 +43,12 @@ public class SecurityFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest servletRequest = (HttpServletRequest) request;
         HttpServletResponse servletResponse = (HttpServletResponse) response;
-        // 判断是否初次访问
-        boolean first = true;
-        for (Cookie cookie : servletRequest.getCookies()) {
-            if ((libraryProperties.getApplicationName() + SESSION_ID).equals(cookie.getName())) {
-                first = false;
-            }
-        }
-        // 初次访问则放入sessionid
-        if (!first) {
-            Cookie cookie = new Cookie((libraryProperties.getApplicationName() + SESSION_ID), UUID.randomUUID().toString());
-            cookie.setMaxAge(86000);
-            cookie.setPath("/");
-            servletResponse.addCookie(cookie);
-        }
         String contextPath = servletRequest.getRequestURI();
+
+        boolean isAnon = isAnonResource(contextPath);
+        boolean isValid = (authenticated(request.getParameter(TOKEN)) && checkAuthorization(contextPath));
         // 匿名访问资源或（已登录并且有权）的情况下直接放行
-        if (isAnonResource(contextPath) || (authenticated(request.getParameter(TOKEN)) && checkAuthorization(contextPath))) {
+        if (isAnon || isValid) {
             filterChain.doFilter(request, response);
         } else {
             servletResponse.sendError(HttpStatus.UNAUTHORIZED.value(), "没有权限。");

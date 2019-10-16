@@ -46,4 +46,14 @@ public interface IEndpoint {
         }
     }
 
+    /**
+     * 发送心跳 .
+     *
+     * @param
+     * @return void
+     * @author andy.sher
+     * @date 2019/10/16 11:40
+     */
+    void ping();
+
 }

@@ -15,11 +15,17 @@ public class BaseModel {
 
     private String id;
 
+    /**
+     * 消息类型[1=普通文字消息/2=弹幕消息]
+     */
+    private String type;
+
     private String message;
 
     public static BaseModel build(String message) {
         BaseModel model = new BaseModel();
         model.setId(UUID.randomUUID().toString());
+        model.setType("1");
         model.setMessage(message);
         return model;
     }

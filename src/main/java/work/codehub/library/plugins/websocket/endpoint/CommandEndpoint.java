@@ -56,4 +56,8 @@ public class CommandEndpoint implements IEndpoint {
         this.session.getBasicRemote().sendText(message);
     }
 
+    @Override
+    public void ping() {
+
+    }
 }

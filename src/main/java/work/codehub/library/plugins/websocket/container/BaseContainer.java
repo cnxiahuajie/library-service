@@ -31,4 +31,13 @@ public class BaseContainer {
         return this.container.entrySet();
     }
 
+    public String[] keys() {
+        String[] keyArray = new String[this.container.keySet().size()];
+        return this.container.keySet().toArray(keyArray);
+    }
+
+    public boolean notFound(String cid) {
+        return !this.container.containsKey(cid) || null == this.container.get(cid) || !this.container.get(cid).isOpen();
+    }
+
 }

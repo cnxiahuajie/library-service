@@ -2,10 +2,11 @@ package work.codehub.library.plugins.websocket.endpoint;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import work.codehub.library.plugins.websocket.container.CommandClientContainer;
 import work.codehub.library.plugins.websocket.container.NotificationClientContainer;
 import work.codehub.library.plugins.websocket.model.BaseModel;
+import work.codehub.library.util.SpringContextUtils;
 
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
@@ -22,7 +23,7 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-@ServerEndpoint("/ws/notification/{cid}")
+@ServerEndpoint("/ws/anon/notification/{cid}")
 public class NotificationEndpoint implements IEndpoint {
 
     private Session session;
@@ -30,10 +31,14 @@ public class NotificationEndpoint implements IEndpoint {
     private String cid;
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("cid") String cid) {
+    public void onOpen(Session session, @PathParam("access_token") String access_token) {
         this.session = session;
-        this.cid = cid;
-        IEndpoint.getContainer(CommandClientContainer.class).put(cid, session);
+        if ("-".equals(access_token)) {
+            this.cid = access_token;
+        } else {
+            this.cid = session.getId();
+        }
+        IEndpoint.getContainer(NotificationClientContainer.class).put(cid, session);
         try {
             IEndpoint.sendMessage(session, BaseModel.build("successful"));
         } catch (Exception e) {
@@ -43,13 +48,16 @@ public class NotificationEndpoint implements IEndpoint {
 
     @OnClose
     public void onClose() {
-        IEndpoint.getContainer(CommandClientContainer.class).remove(this.cid);
+        IEndpoint.getContainer(NotificationClientContainer.class).remove(this.cid);
     }
 
     @OnMessage
     public void onMessage(String message, Session session) {
         // 保持心跳
         if (IEndpoint.PING.equals(message)) {
+            if (IEndpoint.getContainer(NotificationClientContainer.class).notFound(cid)) {
+                IEndpoint.getContainer(NotificationClientContainer.class).put(cid, session);
+            }
             try {
                 IEndpoint.sendMessage(session, BaseModel.build(IEndpoint.PONG));
             } catch (IOException e) {
@@ -60,7 +68,7 @@ public class NotificationEndpoint implements IEndpoint {
 
     @OnError
     public void onError(Session session, Throwable error) {
-        log.error(CommandEndpoint.class.getName(), error);
+        log.error(NotificationEndpoint.class.getName(), error);
     }
 
     /**
@@ -92,4 +100,9 @@ public class NotificationEndpoint implements IEndpoint {
         }
     }
 
+    @Scheduled(fixedRate = 30000)
+    @Override
+    public void ping() {
+        NotificationEndpoint.sendInfo(null, SpringContextUtils.getBean(IEndpoint.PING, BaseModel.class));
+    }
 }
