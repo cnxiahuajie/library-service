@@ -1,10 +1,14 @@
 package work.codehub.library.plugins.websocket.config;
 
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.server.standard.ServerEndpointExporter;
-import work.codehub.library.plugins.websocket.model.Barrage;
-import work.codehub.library.plugins.websocket.model.BaseModel;
+import work.codehub.library.plugins.websocket.constants.WSConstant;
+import work.codehub.library.plugins.websocket.endpoint.IEndpoint;
+import work.codehub.library.plugins.websocket.model.WSMessage;
+import work.codehub.library.pojo.BarrageVO;
+import work.codehub.library.util.StringUtils;
 
 /**
  * websocket配置 .<br>
@@ -20,9 +24,25 @@ public class WebSocketConfig {
         return new ServerEndpointExporter();
     }
 
-    @Bean
-    public BaseModel ping() {
-        return Barrage.build("富强、民主、文明、和谐、自由、平等、公正、法治、爱国、敬业、诚信、友善", "yellow", "red");
+    @Bean(name = IEndpoint.PING)
+    public WSMessage ping() {
+        BarrageVO barrageVO = new BarrageVO();
+        barrageVO.setContent(IEndpoint.PING);
+        return WSMessage.builder().id(StringUtils.getUUID()).type(WSConstant.TYPE_COMMAND).message(JSONObject.toJSONString(barrageVO)).build();
+    }
+
+    @Bean(name = IEndpoint.PONG)
+    public WSMessage pong() {
+        BarrageVO barrageVO = new BarrageVO();
+        barrageVO.setContent(IEndpoint.PONG);
+        return WSMessage.builder().id(StringUtils.getUUID()).message(JSONObject.toJSONString(barrageVO)).type(WSConstant.TYPE_COMMAND).build();
+    }
+
+    @Bean(name = IEndpoint.LOGOUT)
+    public WSMessage logout() {
+        BarrageVO barrageVO = new BarrageVO();
+        barrageVO.setContent(IEndpoint.LOGOUT);
+        return WSMessage.builder().id(StringUtils.getUUID()).message(JSONObject.toJSONString(barrageVO)).type(WSConstant.TYPE_COMMAND).build();
     }
 
 }

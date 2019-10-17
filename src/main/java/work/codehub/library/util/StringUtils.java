@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.util.Random;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
@@ -178,4 +179,15 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
         return str.toString();
     }
 
+    /**
+     * 获取UUID .
+     *
+     * @param
+     * @return java.lang.String UUID
+     * @author andy.sher
+     * @date 2019/10/17 13:03
+     */
+    public static String getUUID() {
+        return UUID.randomUUID().toString();
+    }
 }

@@ -1,5 +1,7 @@
 package work.codehub.library.plugins.websocket.container;
 
+import work.codehub.library.util.StringUtils;
+
 import javax.websocket.Session;
 import java.util.Map;
 import java.util.Set;
@@ -16,15 +18,23 @@ public class BaseContainer {
     private Map<String, Session> container = new ConcurrentHashMap<>();
 
     public void put(String cid, Session session) {
-        this.container.put(cid, session);
+        if (StringUtils.isNotBlank(cid) && null != session) {
+            this.container.put(cid, session);
+        }
     }
 
     public void remove(String cid) {
-        this.container.remove(cid);
+        if (StringUtils.isNotBlank(cid)) {
+            this.container.remove(cid);
+        }
     }
 
     public Session get(String cid) {
-        return this.container.get(cid);
+        if (StringUtils.isNotBlank(cid)) {
+            return this.container.get(cid);
+        } else {
+            return null;
+        }
     }
 
     public Set<Map.Entry<String, Session>> entries() {
@@ -37,7 +47,11 @@ public class BaseContainer {
     }
 
     public boolean notFound(String cid) {
-        return !this.container.containsKey(cid) || null == this.container.get(cid) || !this.container.get(cid).isOpen();
+        if (StringUtils.isNotBlank(cid)) {
+            return !this.container.containsKey(cid) || null == this.container.get(cid) || !this.container.get(cid).isOpen();
+        } else {
+            return true;
+        }
     }
 
 }

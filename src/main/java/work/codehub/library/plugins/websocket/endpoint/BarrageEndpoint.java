@@ -5,11 +5,10 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import work.codehub.library.plugins.websocket.container.NotificationClientContainer;
-import work.codehub.library.plugins.websocket.model.BaseModel;
+import work.codehub.library.plugins.websocket.model.WSMessage;
 import work.codehub.library.util.SpringContextUtils;
 
 import javax.websocket.*;
-import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.Iterator;
@@ -23,27 +22,17 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-@ServerEndpoint("/ws/anon/notification/{cid}")
-public class NotificationEndpoint implements IEndpoint {
+@ServerEndpoint("/ws/anon/barrage")
+public class BarrageEndpoint implements IEndpoint {
 
     private Session session;
 
     private String cid;
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("access_token") String access_token) {
-        this.session = session;
-        if ("-".equals(access_token)) {
-            this.cid = access_token;
-        } else {
-            this.cid = session.getId();
-        }
-        IEndpoint.getContainer(NotificationClientContainer.class).put(cid, session);
-        try {
-            IEndpoint.sendMessage(session, BaseModel.build("successful"));
-        } catch (Exception e) {
-            log.error(NotificationClientContainer.class.getName(), e);
-        }
+    public void onOpen(Session session) {
+        this.cid = session.getId();
+        IEndpoint.getContainer(NotificationClientContainer.class).put(this.cid, session);
     }
 
     @OnClose
@@ -59,7 +48,7 @@ public class NotificationEndpoint implements IEndpoint {
                 IEndpoint.getContainer(NotificationClientContainer.class).put(cid, session);
             }
             try {
-                IEndpoint.sendMessage(session, BaseModel.build(IEndpoint.PONG));
+                IEndpoint.sendMessage(session, SpringContextUtils.getBean(IEndpoint.PONG, WSMessage.class));
             } catch (IOException e) {
                 log.error(NotificationClientContainer.class.getName(), e);
             }
@@ -68,41 +57,51 @@ public class NotificationEndpoint implements IEndpoint {
 
     @OnError
     public void onError(Session session, Throwable error) {
-        log.error(NotificationEndpoint.class.getName(), error);
+        try {
+            session.close();
+        } catch (Exception e) {
+            log.error(BarrageEndpoint.class.getName(), e);
+        } finally {
+            log.error(BarrageEndpoint.class.getName(), error);
+        }
     }
 
     /**
      * 发送消息 .
      *
-     * @param cids  客户端ID
-     * @param model 消息模型
+     * @param cids    客户端ID
+     * @param message 消息
      * @return void
      * @author andy.sher
      * @date 2019/10/15 14:18
      */
-    public static void sendInfo(String[] cids, BaseModel model) {
+    public static void sendInfo(String[] cids, WSMessage message) {
         try {
             // 广播
             if (ArrayUtils.isEmpty(cids)) {
                 Iterator<Map.Entry<String, Session>> it = IEndpoint.getContainer(NotificationClientContainer.class).entries().iterator();
+                Session session;
                 while (it.hasNext()) {
-                    IEndpoint.sendMessage(it.next().getValue(), model);
+                    session = it.next().getValue();
+                    // 发送心跳
+                    IEndpoint.sendMessage(session, message);
                 }
             }
             // 指定
             else {
                 for (String cid : cids) {
-                    IEndpoint.sendMessage(IEndpoint.getContainer(NotificationClientContainer.class).get(cid), model);
+                    IEndpoint.sendMessage(IEndpoint.getContainer(NotificationClientContainer.class).get(cid), message);
                 }
             }
         } catch (Exception e) {
-            log.error(NotificationEndpoint.class.getName(), e);
+            log.error(BarrageEndpoint.class.getName(), e);
         }
     }
 
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 10000)
     @Override
     public void ping() {
-        NotificationEndpoint.sendInfo(null, SpringContextUtils.getBean(IEndpoint.PING, BaseModel.class));
+        // ping
+        BarrageEndpoint.sendInfo(null, SpringContextUtils.getBean(IEndpoint.PING, WSMessage.class));
     }
 }

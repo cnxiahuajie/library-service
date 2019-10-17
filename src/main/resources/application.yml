@@ -33,6 +33,14 @@ spring:
       mail.smtp.auth: true
       mail.smtp.ssl.enable: true
       mail.smtp.socketFactory.class: javax.net.ssl.SSLSocketFactory
+  activemq:
+    broker-url: tcp://192.168.122.25:61616
+    user: guest
+    password: password
+    pool:
+      enabled: false
+    queue:
+      barrage: library-barrage
 
 #mybatis
 mybatis-plus:

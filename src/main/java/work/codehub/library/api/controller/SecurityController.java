@@ -69,6 +69,9 @@ public class SecurityController {
 
             JSONObject data = new JSONObject();
             data.put("authorDetails", authorVO);
+
+            // 删除验证码
+            verificationCodeRedisTemplate.delete(username);
             return ResponseEntity.build(HttpStatus.OK, data);
         } else {
             throw new UnauthenticationException("认证失败。");

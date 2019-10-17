@@ -9,6 +9,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
@@ -20,21 +22,20 @@ import org.springframework.web.multipart.MultipartFile;
 import work.codehub.library.api.model.RequestEntity;
 import work.codehub.library.api.model.ResponseEntity;
 import work.codehub.library.constants.CommonConstants;
+import work.codehub.library.constants.DomainConstants;
 import work.codehub.library.domain.Article;
 import work.codehub.library.domain.ArticleCategory;
 import work.codehub.library.domain.Author;
 import work.codehub.library.domain.RArticleCategory;
 import work.codehub.library.helper.LocalStore;
-import work.codehub.library.plugins.websocket.endpoint.NotificationEndpoint;
-import work.codehub.library.plugins.websocket.model.Barrage;
+import work.codehub.library.plugins.activemq.producer.BarrageMessageProducer;
+import work.codehub.library.plugins.websocket.config.BarrageColor;
 import work.codehub.library.pojo.ArticleCategoryVO;
 import work.codehub.library.pojo.ArticleVO;
 import work.codehub.library.pojo.AuthorVO;
+import work.codehub.library.pojo.BarrageVO;
 import work.codehub.library.repository.elasticsearch.ArticleRepository;
-import work.codehub.library.service.IArticleCategoryService;
-import work.codehub.library.service.IArticleService;
-import work.codehub.library.service.IAuthorService;
-import work.codehub.library.service.IRArticleCategoryService;
+import work.codehub.library.service.*;
 import work.codehub.library.util.BeanUtils;
 import work.codehub.library.util.StringUtils;
 
@@ -68,6 +69,12 @@ public class ArticleController {
 
     @Resource
     private IAuthorService authorService;
+
+    @Resource
+    private IBarrageService barrageService;
+
+    @Resource
+    private BarrageMessageProducer barrageMessageProducer;
 
     @PostMapping(value = "/article")
     public ResponseEntity add(@RequestBody RequestEntity requestEntity) {
@@ -193,8 +200,15 @@ public class ArticleController {
             }
         }
 
-        // 弹幕通知所有人
-        NotificationEndpoint.sendInfo(null, Barrage.build(String.format("%s 发布了 %s", LocalStore.getAuthor().getName(), articleVO.getTitle())));
+        // 保存弹幕
+        BarrageVO barrageVO = new BarrageVO();
+        barrageVO.setType(DomainConstants.Barrage.TYPE_1);
+        barrageVO.setContent(String.format("%s刚刚发布了【%s】", LocalStore.getAuthor().getName(), articleVO.getTitle()));
+        barrageVO.setColor(BarrageColor.Color.BLACK);
+        barrageService.save(barrageVO);
+
+        // 推送弹幕
+        barrageMessageProducer.send(barrageVO);
 
         return ResponseEntity.build(HttpStatus.CREATED);
     }
@@ -204,8 +218,12 @@ public class ArticleController {
         if (CommonConstants.Symbol.MINUS.equals(query.trim())) {
             query = StringUtils.EMPTY;
         }
+        MatchQueryBuilder titleQuery = QueryBuilders.matchQuery("title", query);
+        MatchQueryBuilder contentQuery = QueryBuilders.matchQuery("content", query);
+        QueryBuilder totalFilter = QueryBuilders.boolQuery().filter(titleQuery).should(contentQuery);
+
         SearchQuery searchQuery = new NativeSearchQueryBuilder().
-                withQuery(new MatchQueryBuilder("content", query))
+                withQuery(totalFilter)
                 .withPageable(PageRequest.of(page, 10)).build();
         Page<ArticleVO> articlePage = articleRepository.search(searchQuery);
 
