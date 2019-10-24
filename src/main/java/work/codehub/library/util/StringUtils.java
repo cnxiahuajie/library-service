@@ -14,8 +14,7 @@ import java.util.regex.Pattern;
 public class StringUtils extends org.apache.commons.lang3.StringUtils {
 
     private static Pattern PATTERN_SCRIPT = Pattern.compile("<script>(.*?)</script>", Pattern.CASE_INSENSITIVE);
-    private static Pattern PATTERN_SCRIPT_ATTR = Pattern.compile("src[\r\n]*=[\r\n]*\\\'(.*?)\\\'", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
-    private static Pattern PATTERN_SCRIPT_ATTR2 = Pattern.compile("src[\r\n]*=[\r\n]*\\\"(.*?)\\\"", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
+    private static Pattern PATTERN_SCRIPT_ATTR = Pattern.compile("<img(.*?)src[\r\n]*=[\r\n]*\\\'(.*?)\\\'", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
     private static Pattern PATTERN_SCRIPT_END = Pattern.compile("</script>", Pattern.CASE_INSENSITIVE);
     private static Pattern PATTERN_ANY_TAG = Pattern.compile("<script(.*?)>", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
     private static Pattern PATTERN_EVAL = Pattern.compile("eval\\((.*?)\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
@@ -125,25 +124,24 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
      */
     public static String stripXSS(String content) {
         if (StringUtils.isNotBlank(content)) {
-            content = content.replaceAll("", "");
-            content = PATTERN_SCRIPT.matcher(content).replaceAll("");
+            content = content.replaceAll(StringUtils.EMPTY, StringUtils.EMPTY);
+            content = PATTERN_SCRIPT.matcher(content).replaceAll(StringUtils.EMPTY);
             // Avoid anything in a src="..." type of e­xpression
-            content = PATTERN_SCRIPT_ATTR.matcher(content).replaceAll("");
-            content = PATTERN_SCRIPT_ATTR2.matcher(content).replaceAll("");
+//            content = PATTERN_SCRIPT_ATTR.matcher(content).replaceAll(StringUtils.EMPTY);
             // Remove any lonesome </script> tag
-            content = PATTERN_SCRIPT_END.matcher(content).replaceAll("");
+            content = PATTERN_SCRIPT_END.matcher(content).replaceAll(StringUtils.EMPTY);
             // Remove any lonesome <script ...> tag
-            content = PATTERN_ANY_TAG.matcher(content).replaceAll("");
+            content = PATTERN_ANY_TAG.matcher(content).replaceAll(StringUtils.EMPTY);
             // Avoid eval(...) e­xpressions
-            content = PATTERN_EVAL.matcher(content).replaceAll("");
+            content = PATTERN_EVAL.matcher(content).replaceAll(StringUtils.EMPTY);
             // Avoid e­xpression(...) e­xpressions
-            content = PATTERN_E­XPRESSION.matcher(content).replaceAll("");
+            content = PATTERN_E­XPRESSION.matcher(content).replaceAll(StringUtils.EMPTY);
             // Avoid javascript:... e­xpressions
-            content = PATTERN_JAVASCRIPT.matcher(content).replaceAll("");
+            content = PATTERN_JAVASCRIPT.matcher(content).replaceAll(StringUtils.EMPTY);
             // Avoid vbscript:... e­xpressions
-            content = PATTERN_VBSCRIPT.matcher(content).replaceAll("");
+            content = PATTERN_VBSCRIPT.matcher(content).replaceAll(StringUtils.EMPTY);
             // Avoid onload= e­xpressions
-            content = PATTERN_ONLOAD.matcher(content).replaceAll("");
+            content = PATTERN_ONLOAD.matcher(content).replaceAll(StringUtils.EMPTY);
         }
         return content;
     }
